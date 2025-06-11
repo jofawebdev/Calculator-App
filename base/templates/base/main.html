@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Django Calculator{% endblock %}</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'styles/main.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="icon" type="image/svg+xml" href="{% static 'images/calculator.svg' %}">
+    </head>
+
+    <body>
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="navbar-container">
+                <!-- Logo -->
+                <a class="navbar-brand" href="{% url 'calculator' %}">
+                    <img src="{% static 'images/calculator.svg' %}" alt="Calculator Logo">
+                    <span>DjangoCalc</span>
+                </a>
+
+                <!-- Navigation Links -->
+                <div class="navbar-links">
+                    <a href="{% url 'calculator' %}" class="nav-link active">
+                        <i class="fas fa-calculator"></i> Calculator
+                    </a>
+
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-history"></i> History
+                    </a>
+
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-question-circle"></i> Help
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Block -->
+        <main class="main-content">
+            {% block content %}
+                <!-- Content will be injected here from child templates -->
+            {% endblock content %}
+        </main>
+
+        <!-- Modern Detailed Footer -->
+        <footer class="app-footer">
+            <div class="footer-container">
+                <!-- Footer Columns -->
+                <div class="footer-column">
+                    <h4>DjangoCalc</h4>
+                    <p>A modern calculator application built with Django demonstrating best practices in web development.</p>
+
+                    <div class="social-links">
+                        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li>
+                            <a href="{% url 'calculator' %}">
+                                <i class="fas fa-calculator"></i>
+                                Calculator
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-history"></i>
+                                Calculation History
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-book"></i>
+                                Documentation
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#">
+                                <i class="fas fa-bug"></i>
+                                Report Issue
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li>
+                            <a href="https://docs.djangoproject.com/" target="_blank">
+                                <i class="fas fa-book-open"></i>
+                                Django Docs
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="https://python.org/" target="_blank">
+                                <i class="fab fa-python"></i>
+                                Python
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="https://developer.mozilla.org/" target="_blank">
+                                <i class="fas fa-code"></i>
+                                MDN Web Docs
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="https://www.jofawebdev.co.ke/" target="_blank">
+                                <i class="fas fa-globe-africa"></i>
+                                Developer Portfolio
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Subcribe</h4>
+                    <p>Stay updated with new features and updates</p>
+                    <form class="subscribe-form">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit">
+                            <i class="fas fa-paper-plane"></i>
+                            Subscribe
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Copyright Section -->
+            <div class="copyright-section">
+                <p>&copy; 2025 DjangoCalc. All rights reserved.
+                    Developed by <a href="https://jofawebdev.co.ke/" target="_blank">Jofawebdev</a>
+                </p>
+
+                <div class="tech-badges">
+                    <span>Django 5.0</span>
+                    <span>Python 3.12.3</span>
+                    <span>HTML5</span>
+                    <span>CSS3</span>
+                </div>
+            </div>
+        </footer>
+
+
+        <!-- JavaScript -->
+        <script>
+            // Mobile menu toggle
+            document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+                const navLinks = document.querySelector('.navbar-links');
+                navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+            });
+
+            // Responsive behavior for navbar
+            window.addEventListener('resize', function() {
+                const navLinks = document.querySelector('.navbar-links');
+                if (window.innerWidth > 768) {
+                    navLinks.style.display = 'flex';
+                } else {
+                    navLinks.style.display = 'none';
+                }
+            });
+        </script>
+
+        {% block extra_js %}{% endblock %}
+    </body>
+</html>

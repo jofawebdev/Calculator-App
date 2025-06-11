@@ -1,0 +1,94 @@
+{% extends "base/main.html" %}
+
+{% block title %}Calculator - DjangoCalc{% endblock %}
+
+{% block content %}
+    <div class="app-container">
+
+        <!-- Calculator Card -->
+        <div class="calculator-card">
+            <!-- Display Section -->
+            <div class="calculator-display">
+                {% if result %}
+                    <div class="calculation-history">{{ number_one }} {{ operation_symbol }} {{ number_two }} =</div>
+                    <div class="current-value">{{ result }}</div>
+                {% else %}
+                    <div class="current-value">0</div>
+                {% endif %}
+            </div>
+
+            <!-- Form Section -->
+            <form method="POST" action="{% url 'calculator' %}" class="calculator-form">
+                {% csrf_token %}
+                
+                <div class="input-group">
+                    <label for="number_one"><i class="fas fa-calculator"></i> First Number</label>
+                    <input type="number" id="number_one" name="number_one" 
+                           placeholder="Enter number" step="any" required
+                           value="{{ number_one|default_if_none:'' }}">
+                </div>
+                
+                <div class="input-group">
+                    <label for="operation"><i class="fas fa-cogs"></i> Operation</label>
+                    <div class="operation-selector">
+                        <select id="operation" name="operation" required>
+                            <option value="add" data-symbol="+" {% if operation == "add" %}selected{% endif %}>Addition (+)</option>
+
+                            <option value="subtract" data-symbol="-" {% if operation == "subtract" %}selected{% endif %}>Subtraction (-)</option>
+
+                            <option value="multiply" data-symbol="*" {% if operation == "multiply" %}selected{% endif %}>Multiplication (*)</option>
+
+                            <option value="divide" data-symbol="÷" {% if operation == "divide" %}selected{% endif %}>Division (÷)</option>
+                            
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="number_two"><i class="fas fa-calculator"></i> Second Number</label>
+                    <input type="number" id="number_two" name="number_two" 
+                           placeholder="Enter number" step="any" required
+                           value="{{ number_two|default_if_none:'' }}">
+                </div>
+                
+                <button type="submit" class="calculate-btn">
+                    <i class="fas fa-equals"></i> Calculate
+                </button>
+                
+                <!-- Error Messages -->
+                {% if error %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- JavaScript for dynamic operation symbol -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const operationSelect = document.getElementById('operation');
+            const operationSymbol = document.querySelector('.operation-symbol');
+            
+            // Update display when operation changes
+            operationSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const symbol = selectedOption.getAttribute('data-symbol');
+                if(operationSymbol) operationSymbol.textContent = symbol;
+            });
+        });
+    </script>
+
+    <!-- Set Initial display for mobile menu  -->
+    <script>
+        // Set initial display for mobile menu
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 768) {
+                document.querySelector('.navbar-links').style.display = 'none';
+            }
+        }); 
+    </script>
+{% endblock %}
