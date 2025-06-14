@@ -29,10 +29,27 @@
                     <a href="#" class="nav-link">
                         <i class="fas fa-history"></i> History
                     </a>
-
+                    
                     <a href="#" class="nav-link">
                         <i class="fas fa-question-circle"></i> Help
                     </a>
+
+                    <!-- Add user authentication links  -->
+                    <div class="user-links">
+                        {% if user.is_authenticated %}
+                            <span class="welcome-msg">Hi, {{ user.username }}</span>
+                            <a href="{% url 'logout' %}" class="nav-link">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="nav-link">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                            <a href="{% url 'register' %}" class="nav-link">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <!-- Mobile Menu Button -->
@@ -178,6 +195,8 @@
                 }
             });
         </script>
+
+        {% block extra_css %}{% endblock %}
 
         {% block extra_js %}{% endblock %}
     </body>

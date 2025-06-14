@@ -453,3 +453,30 @@ body {
         font-size: 2rem;
     }
 }
+
+/* Add to existing main.css */
+.user-links {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+.welcome-msg {
+    color: #007bff;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .user-links {
+        margin-left: 0;
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .navbar-links {
+        flex-direction: column;
+    }
+}
