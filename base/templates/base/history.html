@@ -1,0 +1,105 @@
+{% extends 'base/main.html' %}
+
+{% block title %}Calculation History | DjangoCalc{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <h1 class="history-header">
+        <i class="fas fa-history"></i> Calculation History
+    </h1>
+    
+    {% if calculations %}
+    <!-- Table view for medium/large screens -->
+    <div class="table-container">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Expression</th>
+                    <th>Result</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for calc in calculations %}
+                <tr>
+                    <td>{{ calc.num1 }} {{ calc.get_operation_symbol }} {{ calc.num2 }}</td>
+                    <td>{{ calc.result }}</td>
+                    <td>{{ calc.created_at|date:"M d, Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Card view for small screens -->
+    <div class="mobile-history-cards">
+        {% for calc in calculations %}
+        <div class="history-card">
+            <div class="card-header">
+                <span>Calculation #{{ forloop.counter }}</span>
+                <span class="card-date">{{ calc.created_at|date:"M d, Y" }}</span>
+            </div>
+            <div class="card-body">
+                <div class="card-row">
+                    <span class="card-label">
+                        <i class="fas fa-calculator"></i> Expression:
+                    </span>
+                    <span class="card-value">{{ calc.num1 }} {{ calc.get_operation_symbol }} {{ calc.num2 }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-label">
+                        <i class="fas fa-equals"></i> Result:
+                    </span>
+                    <span class="card-value">{{ calc.result }}</span>
+                </div>
+                <div class="card-row">
+                    <span class="card-label">
+                        <i class="fas fa-clock"></i> Time:
+                    </span>
+                    <span class="card-value">{{ calc.created_at|date:"H:i" }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination-container">
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="page-link">
+                    <i class="fas fa-angle-double-left"></i> First
+                </a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-link">
+                    <i class="fas fa-angle-left"></i> Prev
+                </a>
+            {% endif %}
+            
+            <span class="current-page">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-link">
+                    Next <i class="fas fa-angle-right"></i>
+                </a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">
+                    Last <i class="fas fa-angle-double-right"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-history">
+        <i class="fas fa-clipboard-list"></i>
+        <p>Your calculation history is empty. Start using the calculator to see your calculations appear here!</p>
+        <a href="{% url 'calculator' %}" class="btn-calculate">
+            <i class="fas fa-calculator"></i> Start Calculating
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,20 +1,21 @@
 from django.shortcuts import render, redirect
 from django.views import View
+from django.views.generic import ListView
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from .forms import RegisterForm, LoginForm  # Import the new forms
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .forms import RegisterForm, LoginForm
+from .models import Calculation  # Import the Calculation model
 
 class CalculatorView(View):
     """
-    A class-based view to handle calculator operations.
-
-    GET: Renders the calculator template
-    POST: Processes calculation and returns result
+    Class-based view to handle calculator operations.
+    GET: Renders calculator template
+    POST: Processes calculation, saves to history (authenticated users), and returns result
     """
-
     template_name = 'base/calculator.html'
-
-    # Mapping of operation names to their respective functions
+    
+    # Mapping operations to their mathematical functions
     OPERATION_MAP = {
         'add': lambda x, y: x + y,
         'subtract': lambda x, y: x - y,
@@ -23,16 +24,19 @@ class CalculatorView(View):
     }
 
     def get(self, request):
-        """
-        Handle GET requests - render an empty calculator form
-        """
+        """Render empty calculator form for GET requests"""
         return render(request, self.template_name)
 
     def post(self, request):
         """
-        Handle POST requests - process calculation and return result or error
+        Process calculation form submission:
+        1. Validate input numbers
+        2. Validate operation
+        3. Perform calculation
+        4. Save to database (authenticated users)
+        5. Return result or appropriate error
         """
-        # Extract and validate input parameters
+        # Validate input numbers
         try:
             num1 = float(request.POST.get('number_one', '0'))
             num2 = float(request.POST.get('number_two', '0'))
@@ -45,7 +49,7 @@ class CalculatorView(View):
                 'operation': request.POST.get('operation', '')
             })
 
-        # Validate operation type
+        # Validate operation
         if operation not in self.OPERATION_MAP:
             return render(request, self.template_name, {
                 'error': 'Invalid operation selected',
@@ -57,8 +61,9 @@ class CalculatorView(View):
         # Perform calculation
         try:
             result = self.OPERATION_MAP[operation](num1, num2)
+            
+            # Handle division by zero
             if result is None:
-                # Handle division by zero
                 return render(request, self.template_name, {
                     'error': 'Division by zero is not allowed',
                     'number_one': num1,
@@ -73,41 +78,72 @@ class CalculatorView(View):
                 'operation': operation
             })
 
-        # On success, clear form inputs and show result
+        # Save calculation to database for authenticated users
+        if request.user.is_authenticated:
+            Calculation.objects.create(
+                user=request.user,
+                num1=num1,
+                num2=num2,
+                operation=operation,
+                result=result
+            )
+
+        # Return successful result
         return render(request, self.template_name, {
             'result': result,
             'operation_symbol': self.get_operation_symbol(operation)
         })
 
     def get_operation_symbol(self, operation):
-        """
-        Helper method to return the math symbol corresponding to an operation
-        """
+        """Return mathematical symbol for given operation name"""
         return {
             'add': '+',
             'subtract': '-',
             'multiply': '*',
             'divide': '÷',
         }.get(operation, '')
-    
+
+
+class HistoryView(LoginRequiredMixin, ListView):
+    """
+    View to display calculation history for authenticated users.
+    Requires login - redirects to login page if not authenticated.
+    Displays paginated list of user's calculations (most recent first).
+    """
+    model = Calculation
+    template_name = 'base/history.html'
+    context_object_name = 'calculations'  # Template variable name
+    paginate_by = 10  # Show 10 calculations per page
+
+    def get_queryset(self):
+        """
+        Return filtered queryset:
+        - Only current user's calculations
+        - Ordered by most recent first
+        """
+        return Calculation.objects.filter(
+            user=self.request.user
+        ).order_by('-created_at')
 
 
 class RegisterView(View):
     """
-    Handles user registration
+    Handles user registration:
     GET: Displays registration form
-    POST: Processes registration data
+    POST: Processes registration data and creates new user
     """
     template_name = 'registration/register.html'
     form_class = RegisterForm
 
     def get(self, request):
+        """Redirect authenticated users away from registration page"""
         if request.user.is_authenticated:
             return redirect('calculator')
         form = self.form_class()
         return render(request, self.template_name, {'form': form})
     
     def post(self, request):
+        """Validate form and create new user account"""
         form = self.form_class(request.POST)
         if form.is_valid():
             user = form.save()
@@ -115,24 +151,26 @@ class RegisterView(View):
             messages.success(request, "Registration successful!")
             return redirect('calculator')
         return render(request, self.template_name, {'form': form})
-    
+
 
 class LoginView(View):
     """
-    Handles User Authentication
+    Handles user authentication:
     GET: Displays login form
-    POST: Processes login credentials
+    POST: Validates credentials and logs in user
     """
     template_name = 'registration/login.html'
     form_class = LoginForm
 
     def get(self, request):
+        """Redirect authenticated users away from login page"""
         if request.user.is_authenticated:
             return redirect('calculator')
         form = self.form_class()
         return render(request, self.template_name, {'form': form})
     
     def post(self, request):
+        """Authenticate user and create session"""
         form = self.form_class(request, data=request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
@@ -144,11 +182,14 @@ class LoginView(View):
                 messages.success(request, f"Welcome back, {username}!")
                 return redirect('calculator')
         return render(request, self.template_name, {'form': form})
-    
+
 
 def logout_view(request):
     """
-    Handles user logout
+    Handles user logout:
+    1. Ends user session
+    2. Displays logout message
+    3. Redirects to calculator
     """
     logout(request)
     messages.info(request, "You have been logged out.")
